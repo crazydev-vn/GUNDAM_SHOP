@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<!-- nhận dữ liệu -> vẽ -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Chi Tiết Sản Phẩm | Gundam Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="brand">
+                <h1 class="brand-title">Gundam Store</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="contact.html">Liên hệ</a></li>
+                    <li><a href="track.html">Tra cứu đơn</a></li>
+                    <li><a href="#" id="cart-icon" style="color: var(--color-secondary); font-weight: bold;">Giỏ hàng
+                            (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="product-detail-container" class="product-detail-layout">
+            <!-- Render động thông tin chi tiết -->
+        </div>
+
+        <section>
+            <h2>Sản Phẩm Khác</h2>
+            <div id="related-product-list" class="product-grid"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 Gundam Store. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+
+    <!-- Popup Giỏ Hàng -->
+    <div id="cart-modal" class="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="cart-modal-header">
+                <h2>Giỏ Hàng Của Bạn</h2>
+                <button id="close-cart" class="btn btn-outline" style="padding: 4px 12px; font-size: 1.2rem;"
+                    aria-label="Đóng giỏ hàng">&times;</button>
+            </div>
+            <div class="cart-modal-body" id="cart-items"></div>
+            <div class="cart-modal-footer">
+                <p class="cart-total">Tổng giá trị: <span id="cart-total-price">0 đ</span></p>
+                <a href="contact.html" class="btn btn-secondary">Đến trang Đặt cọc</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/products.js"></script>
+    <script>
+        // Tên danh mục hiển thị thân thiện (khớp với bộ lọc ở products.html)
+        const CATEGORY_LABELS = {
+            "hg": "HG (High Grade)",
+            "rg": "RG (Real Grade)",
+            "mg": "MG (Master Grade)",
+            "pg": "PG (Perfect Grade)",
+            "sd": "SD (Super Deformed)",
+            "phu-kien": "Dụng cụ & Phụ kiện",
+            "khac": "Mô hình khác"
+        };
+
+        function renderProductDetail() {
+            const params = new URLSearchParams(window.location.search);
+            const productId = Number(params.get('id'));
+            const product = products.find(item => item.id === productId);
+            const container = document.querySelector("#product-detail-container");
+            const relatedSection = document.querySelector("#related-product-list").closest("section");
+
+            // Không có id hoặc id sai -> báo lỗi rõ ràng, không tự hiện sản phẩm số 1
+            if (!product) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">Không tìm thấy thông tin sản phẩm! <a href="products.html">Quay lại danh sách</a></p>';
+                if (relatedSection) relatedSection.style.display = "none";
+                return;
+            }
+
+            document.title = `${product.name} | Chi Tiết Sản Phẩm`;
+            // isPoOpen, poBadge, slotBar, formatDate... dùng chung từ main.js
+            const open = isPoOpen(product);
+            const maxQty = Math.min(product.remaining_slots, 99);
+            const bonus = Array.isArray(product.variants_bonus) ? product.variants_bonus : [];
+
+            container.innerHTML = `
+                <div>
+                    <img src="${escapeHTML(product.image)}" alt="${escapeHTML(product.name)}" style="width: 100%; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                </div>
+                <div class="product-detail-info">
+                    <p>${poBadge(product.po_status)}</p>
+                    <h1>${escapeHTML(product.name)}</h1>
+                    <p class="price" style="font-size: 1.5rem; margin: 10px 0 0;">Tổng: ${formatVND(product.total_price)}</p>
+                    <p style="font-weight: 600; margin-bottom: 10px;">Cọc đợt 1 từ ${formatVND(product.deposit_price)}</p>
+                    <p style="margin-bottom: 16px; line-height: 1.7;">${escapeHTML(product.description)}</p>
+                    <h2>Thông tin pre-order</h2>
+                    <dl>
+                        <dt>Danh mục:</dt><dd>${escapeHTML(CATEGORY_LABELS[product.category] || product.category)}</dd>
+                        <dt>Slot còn lại:</dt><dd>${product.remaining_slots}/${product.total_slots} slot ${slotBar(product)}</dd>
+                        <dt>Hạn chót cọc:</dt><dd>${formatDate(product.cut_off_date)}</dd>
+                        <dt>Dự kiến phát hành:</dt><dd>${escapeHTML(product.release_quarter_year)}</dd>
+                        <dt>Quà tặng/Bonus:</dt><dd>${bonus.length ? '<ul class="bonus-list">' + bonus.map(item => '<li>' + escapeHTML(item) + '</li>').join('') + '</ul>' : 'Không có'}</dd>
+                    </dl>
+                    ${open ? `
+                    <div class="form-group" style="max-width: 140px;">
+                        <label for="quantity-input">Số slot</label>
+                        <input type="number" id="quantity-input" value="1" min="1" max="${maxQty}">
+                    </div>` : ''}
+                    <div class="action-group">
+                        <button type="button" id="add-to-cart-detail" class="btn" ${open ? '' : 'disabled style="opacity: 0.6; cursor: not-allowed;"'}>${open ? 'Thêm vào giỏ hàng' : 'Đã đóng cọc'}</button>
+                        <a href="contact.html" class="btn btn-secondary">Liên hệ tư vấn</a>
+                    </div>
+                </div>
+            `;
+
+            // cart, addToCart, updateCartCount... dùng chung từ main.js
+            updateCartCount();
+
+            const addBtn = document.querySelector("#add-to-cart-detail");
+            if (addBtn && open) {
+                addBtn.addEventListener("click", () => {
+                    const input = document.querySelector("#quantity-input");
+                    let quantity = parseInt(input.value, 10);
+                    if (!Number.isInteger(quantity) || quantity < 1) quantity = 1;
+                    if (quantity > maxQty) quantity = maxQty;
+                    input.value = quantity;
+                    addToCart(product, quantity);
+                });
+            }
+
+            // Sản phẩm khác: ưu tiên cùng danh mục, thiếu thì bổ sung sản phẩm khác
+            const relatedContainer = document.querySelector("#related-product-list");
+            if (relatedContainer) {
+                const others = products.filter(item => item.id !== productId);
+                const sameCategory = others.filter(item => item.category === product.category);
+                const rest = others.filter(item => item.category !== product.category);
+                const relatedProducts = [...sameCategory, ...rest].slice(0, 3);
+
+                relatedContainer.innerHTML = relatedProducts.map(item => `
+                    <article class="product-card">
+                        <img src="${escapeHTML(item.image)}" alt="${escapeHTML(item.name)}">
+                        <div class="content">
+                            <p>${poBadge(item.po_status)}</p>
+                            <h3>${escapeHTML(item.name)}</h3>
+                            <p class="price">Tổng: ${formatVND(item.total_price)}</p>
+                            <a href="product-detail.html?id=${item.id}" class="btn btn-outline" style="margin-top: auto; display: block; text-align: center;">Xem chi tiết</a>
+                        </div>
+                    </article>
+                `).join("");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (products.length > 0) {
+                renderProductDetail();
+            } else {
+                document.addEventListener('products-loaded', renderProductDetail, { once: true });
+            }
+        });
+    </script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

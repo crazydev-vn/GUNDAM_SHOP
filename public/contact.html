@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liên Hệ & Đặt Hàng | Gundam Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="brand">
+                <h1 class="brand-title">Gundam Store</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="contact.html" class="active">Liên hệ</a></li>
+                    <li><a href="track.html">Tra cứu đơn</a></li>
+                    <li><a href="#" id="cart-icon" style="color: var(--color-secondary); font-weight: bold;">Giỏ hàng
+                            (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section>
+            <h1>Thông Tin Đặt Cọc Pre-order</h1>
+            <p>Đặt cọc đợt 1 để giữ slot. Phần còn lại thanh toán khi hàng về kho Việt Nam, lúc đó bạn xác nhận địa chỉ
+                nhận hàng.</p>
+        </section>
+
+        <!-- Khung hiển thị kết quả đặt hàng thành công (main.js điền vào) -->
+        <div id="order-result"></div>
+
+        <div class="products-layout">
+            <form id="order-form" class="contact-form">
+                <div class="form-group">
+                    <label for="customer-name">Họ tên khách hàng</label>
+                    <input type="text" id="customer-name" placeholder="Nguyễn Văn A" autocomplete="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="tel" id="phone" placeholder="0900000000" inputmode="numeric" maxlength="10"
+                        autocomplete="tel" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Địa chỉ nhận hàng (không bắt buộc, có thể bổ sung khi hàng về)</label>
+                    <input type="text" id="address" placeholder="Nhập chi tiết số nhà, tên đường..."
+                        autocomplete="street-address">
+                </div>
+                <div class="form-group">
+                    <label for="deposit-tier">Mức cọc đợt 1</label>
+                    <select id="deposit-tier">
+                        <option value="30">Cọc 30%, phần còn lại trả khi hàng về</option>
+                        <option value="50">Cọc 50%, phần còn lại trả khi hàng về</option>
+                        <option value="100">Thanh toán 100% ngay</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="note">Ghi chú đơn hàng</label>
+                    <textarea id="note" rows="5" placeholder="Ghi chú thêm..."></textarea>
+                </div>
+                <button type="submit" class="btn">Gửi đơn đặt cọc</button>
+            </form>
+
+            <aside class="filter-sidebar">
+                <!-- Tóm tắt giỏ hàng (main.js điền vào) -->
+                <div id="order-summary" style="margin-bottom: var(--space-lg);"></div>
+
+                <h2>Thông Tin Bổ Sung</h2>
+                <p><strong>Địa chỉ cửa hàng:</strong> TP. Buôn Ma Thuột, Đắk Lắk</p>
+                <p><strong>Quy trình:</strong> đặt cọc → hàng về kho Việt Nam → xác nhận địa chỉ và trả đợt 2 → giao
+                    hàng.</p>
+                <p><strong>Hotline:</strong> 0900 000 000</p>
+                <p><strong>Email:</strong> lienhe@gundamstore.vn</p>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 Gundam Store. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+
+    <!-- Popup Giỏ Hàng -->
+    <div id="cart-modal" class="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="cart-modal-header">
+                <h2>Giỏ Hàng Của Bạn</h2>
+                <button id="close-cart" class="btn btn-outline" style="padding: 4px 12px; font-size: 1.2rem;"
+                    aria-label="Đóng giỏ hàng">&times;</button>
+            </div>
+            <div class="cart-modal-body" id="cart-items"></div>
+            <div class="cart-modal-footer">
+                <p class="cart-total">Tổng giá trị: <span id="cart-total-price">0 đ</span></p>
+                <a href="contact.html" class="btn btn-secondary">Đến trang Đặt cọc</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

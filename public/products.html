@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Mô Hình Gundam | Gundam Store</title>
+    <meta name="description"
+        content="Danh sách mô hình Gundam Bandai chính hãng: HG, RG, MG, PG, SD và dụng cụ lắp ráp.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="brand">
+                <h1 class="brand-title">Gundam Store</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html" class="active">Sản phẩm</a></li>
+                    <li><a href="contact.html">Liên hệ</a></li>
+                    <li><a href="track.html">Tra cứu đơn</a></li>
+                    <li><a href="#" id="cart-icon" style="color: var(--color-secondary); font-weight: bold;">Giỏ hàng
+                            (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section>
+            <h1>Danh Sách Mô Hình Gundam</h1>
+            <p>Mô hình Gundam chính hãng Bandai mở pre-order, đặt cọc giữ slot và nhận hàng khi về Việt Nam.</p>
+        </section>
+
+        <div class="products-layout">
+            <aside class="filter-sidebar">
+                <h2>Bộ Lọc Sản Phẩm</h2>
+                <div class="filter-group">
+                    <label for="search-input">Tìm kiếm</label>
+                    <input type="text" id="search-input" placeholder="Nhập tên sản phẩm...">
+                </div>
+                <div class="filter-group">
+                    <label for="category-select">Danh mục</label>
+                    <select id="category-select">
+                        <option value="all">Tất cả danh mục</option>
+                        <option value="hg">HG (High Grade)</option>
+                        <option value="rg">RG (Real Grade)</option>
+                        <option value="mg">MG (Master Grade)</option>
+                        <option value="pg">PG (Perfect Grade)</option>
+                        <option value="sd">SD (Super Deformed)</option>
+                        <option value="phu-kien">Dụng cụ & Phụ kiện</option>
+                        <option value="khac">Mô hình khác</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="price-select">Khoảng giá (giá tổng)</label>
+                    <select id="price-select">
+                        <option value="all">Tất cả giá</option>
+                        <option value="under-500">Dưới 500.000 VNĐ</option>
+                        <option value="500-2000">500.000 - 2.000.000 VNĐ</option>
+                        <option value="over-2000">Trên 2.000.000 VNĐ</option>
+                    </select>
+                </div>
+                <button type="button" id="filter-btn" class="btn" style="width: 100%;">Lọc sản phẩm</button>
+            </aside>
+
+            <!-- main.js sẽ render sản phẩm vào đây -->
+            <section id="product-list" class="product-grid"></section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 Gundam Store. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+
+    <!-- Popup Giỏ Hàng -->
+    <div id="cart-modal" class="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="cart-modal-header">
+                <h2>Giỏ Hàng Của Bạn</h2>
+                <button id="close-cart" class="btn btn-outline" style="padding: 4px 12px; font-size: 1.2rem;"
+                    aria-label="Đóng giỏ hàng">&times;</button>
+            </div>
+            <div class="cart-modal-body" id="cart-items"></div>
+            <div class="cart-modal-footer">
+                <p class="cart-total">Tổng giá trị: <span id="cart-total-price">0 đ</span></p>
+                <a href="contact.html" class="btn btn-secondary">Đến trang Đặt cọc</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

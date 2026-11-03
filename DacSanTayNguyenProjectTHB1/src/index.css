@@ -1,0 +1,47 @@
+/* ===== Phần thêm cho React (style.css cũ không có) ===== */
+
+/* Thông báo nhỏ ở đáy màn hình (thay cho alert).
+   Trước đây main.js tạo bằng cssText, giờ chuyển thành class cho gọn. */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #3b2a1e;
+  color: #fdf8ee;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 2000;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, .25);
+  max-width: 90%;
+  text-align: center;
+}
+
+/* Chữ "Giỏ hàng (n)" trên menu. Bản cũ là thẻ <a href="#">,
+   bản React dùng <button> nên cần xóa kiểu nút mặc định để trông giống link. */
+.cart-link {
+  color: var(--color-secondary);
+  font-weight: bold;
+  background: none;
+  border: none;
+  padding: var(--space-sm) 0;
+  cursor: pointer;
+}
+
+.cart-link:hover {
+  background: none;
+  color: var(--color-primary);
+}
+
+/* Nút/link chiếm trọn chiều ngang, căn giữa chữ (dùng trong thẻ sản phẩm) */
+.btn-block {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
+/* Đánh dấu menu của trang đang mở. NavLink của React Router tự thêm class "active". */
+nav a.active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+}

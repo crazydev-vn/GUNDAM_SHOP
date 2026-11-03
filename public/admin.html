@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Quản Trị | Gundam Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="brand">
+                <h1 class="brand-title">Gundam Store - Quản trị</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Về trang bán hàng</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Đăng nhập bằng ADMIN_KEY trong file .env -->
+        <section id="login-box">
+            <h2>Đăng nhập quản trị</h2>
+            <form id="login-form" class="contact-form" style="max-width: 420px;">
+                <div class="form-group">
+                    <label for="admin-key">Khóa quản trị (ADMIN_KEY)</label>
+                    <input type="password" id="admin-key" autocomplete="off" required>
+                </div>
+                <button type="submit" class="btn">Đăng nhập</button>
+            </form>
+        </section>
+
+        <section id="admin-panel" hidden>
+            <div class="admin-tabs" role="tablist">
+                <button type="button" role="tab" data-tab="orders" aria-selected="true">Đơn cọc</button>
+                <button type="button" role="tab" data-tab="shipments" aria-selected="false">Lô hàng</button>
+                <button type="button" role="tab" data-tab="products" aria-selected="false">Sản phẩm</button>
+                <button type="button" id="logout-btn" class="btn-outline" style="margin-left:auto;">Đăng xuất</button>
+            </div>
+
+            <!-- ĐƠN CỌC -->
+            <div id="tab-orders">
+                <div class="filter-group" style="max-width: 260px;">
+                    <label for="order-filter">Lọc theo trạng thái</label>
+                    <select id="order-filter"></select>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="orders-table"></table>
+                </div>
+            </div>
+
+            <!-- LÔ HÀNG -->
+            <div id="tab-shipments" hidden>
+                <form id="shipment-form" class="contact-form" style="margin-bottom: var(--space-lg);">
+                    <h2>Tạo lô hàng mới</h2>
+                    <div class="form-group">
+                        <label for="tracking-code">Mã vận chuyển quốc tế</label>
+                        <input type="text" id="tracking-code" minlength="5" required>
+                    </div>
+                    <fieldset class="form-group" style="border: 0;">
+                        <legend style="font-weight: 600;">Chọn các đơn đã cọc (Deposited) đưa vào lô</legend>
+                        <div id="deposited-list"></div>
+                    </fieldset>
+                    <button type="submit" class="btn">Tạo lô</button>
+                </form>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="shipments-table"></table>
+                </div>
+            </div>
+
+            <!-- SẢN PHẨM -->
+            <div id="tab-products" hidden>
+                <p style="margin-bottom: var(--space-sm);">Cột "Ép trạng thái" để trống nghĩa là giữ nguyên. Trạng thái
+                    hiển thị bên cạnh đã được tự tính theo slot và hạn chót.</p>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="products-table"></table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 Gundam Store. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Dùng chung từ main.js: escapeHTML, formatVND, formatDate, showToast, poBadge
+        const ORDER_LABELS = {
+            Pending_Deposit: "Chờ cọc",
+            Deposited: "Đã cọc",
+            Waiting_For_Address: "Chờ địa chỉ / đợt 2",
+            Ready_To_Ship: "Sẵn sàng giao",
+            Completed: "Hoàn tất",
+            Forfeited: "Xả cọc"
+        };
+        const $ = (selector) => document.querySelector(selector);
+        let adminKey = sessionStorage.getItem("adminKey") || "";
+
+        // Gọi API kèm x-admin-key; lỗi thì ném Error với nội dung server trả về
+        async function api(path, options = {}) {
+            const response = await fetch(API_BASE + path, {
+                ...options,
+                headers: { "Content-Type": "application/json", "x-admin-key": adminKey }
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.error || "Lỗi " + response.status);
+            return data;
+        }
+        const send = (path, method, body) => api(path, { method, body: body ? JSON.stringify(body) : undefined });
+
+        // ---------- Đăng nhập / tab ----------
+        function showPanel(on) {
+            $("#login-box").hidden = on;
+            $("#admin-panel").hidden = !on;
+        }
+        async function login(key) {
+            adminKey = key;
+            try {
+                await api("/api/orders");
+                sessionStorage.setItem("adminKey", key);
+                showPanel(true);
+                loadOrders();
+            } catch (error) {
+                adminKey = "";
+                sessionStorage.removeItem("adminKey");
+                showPanel(false);
+                showToast(error.message);
+            }
+        }
+        $("#login-form").addEventListener("submit", (event) => {
+            event.preventDefault();
+            login($("#admin-key").value.trim());
+        });
+        $("#logout-btn").addEventListener("click", () => {
+            sessionStorage.removeItem("adminKey");
+            adminKey = "";
+            $("#admin-key").value = "";
+            showPanel(false);
+        });
+        document.querySelectorAll("[data-tab]").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b === button)));
+                ["orders", "shipments", "products"].forEach((name) => ($("#tab-" + name).hidden = name !== button.dataset.tab));
+                if (button.dataset.tab === "orders") loadOrders();
+                if (button.dataset.tab === "shipments") loadShipments();
+                if (button.dataset.tab === "products") loadProducts();
+            });
+        });
+
+        const statusOptions = (selected) =>
+            Object.entries(ORDER_LABELS).map(([value, label]) =>
+                `<option value="${value}" ${value === selected ? "selected" : ""}>${label}</option>`).join("");
+
+        // ---------- Đơn cọc ----------
+        $("#order-filter").innerHTML = '<option value="">Tất cả</option>' + statusOptions("");
+        $("#order-filter").addEventListener("change", loadOrders);
+
+        async function loadOrders() {
+            try {
+                const status = $("#order-filter").value;
+                const orders = await api("/api/orders" + (status ? "?order_status=" + status : ""));
+                $("#orders-table").innerHTML =
+                    "<thead><tr><th>Mã</th><th>Khách</th><th>Mô hình</th><th>Cọc / Đợt 2</th><th>Địa chỉ giao hàng</th><th>Trạng thái</th><th></th></tr></thead><tbody>" +
+                    (orders.length ? orders.map((o) => `
+                    <tr data-id="${o._id}">
+                        <td>#${String(o._id).slice(-6).toUpperCase()}<br>${formatDate(o.created_at)}</td>
+                        <td>${escapeHTML(o.customer_name)}<br>${escapeHTML(o.phone_number)}</td>
+                        <td>${escapeHTML(o.product_name)} × ${o.quantity}</td>
+                        <td>${formatVND(o.deposit_amount)} (${o.deposit_tier}%)<br>${formatVND(o.second_payment_amount)}</td>
+                        <td><input type="text" class="f-address" value="${escapeHTML(o.shipping_address)}" placeholder="chưa có"></td>
+                        <td><select class="f-status">${statusOptions(o.order_status)}</select></td>
+                        <td><button type="button" class="save-order" data-current="${o.order_status}" data-addr="${escapeHTML(o.shipping_address)}">Lưu</button></td>
+                    </tr>`).join("") : '<tr><td colspan="7">Chưa có đơn nào.</td></tr>') + "</tbody>";
+            } catch (error) { showToast(error.message); }
+        }
+        $("#orders-table").addEventListener("click", async (event) => {
+            const button = event.target.closest(".save-order");
+            if (!button) return;
+            const row = button.closest("tr");
+            const body = {};
+            const status = row.querySelector(".f-status").value;
+            const address = row.querySelector(".f-address").value.trim();
+            if (status !== button.dataset.current) body.order_status = status;
+            if (address && address !== button.dataset.addr) body.shipping_address = address;
+            if (!Object.keys(body).length) return showToast("Chưa có thay đổi nào.");
+            try {
+                await send(`/api/orders/${row.dataset.id}/status`, "PATCH", body);
+                showToast("Đã cập nhật đơn.");
+                loadOrders();
+            } catch (error) { showToast(error.message); }
+        });
+
+        // ---------- Lô hàng ----------
+        async function loadShipments() {
+            try {
+                const [batches, deposited] = await Promise.all([api("/api/shipments"), api("/api/orders?order_status=Deposited")]);
+                const used = new Set(batches.flatMap((b) => b.associated_orders.map((o) => o._id)));
+                const free = deposited.filter((o) => !used.has(o._id));
+                $("#deposited-list").innerHTML = free.length
+                    ? free.map((o) => `<label style="display:block;"><input type="checkbox" value="${o._id}"> #${String(o._id).slice(-6).toUpperCase()} - ${escapeHTML(o.customer_name)} - ${escapeHTML(o.product_name)} × ${o.quantity}</label>`).join("")
+                    : "<p>Không có đơn đã cọc nào chưa vào lô.</p>";
+                $("#shipments-table").innerHTML =
+                    "<thead><tr><th>Lô</th><th>Mã vận chuyển</th><th>Trạng thái</th><th>Đơn trong lô</th><th></th></tr></thead><tbody>" +
+                    (batches.length ? batches.map((b) => `
+                    <tr data-id="${b.batch_id}">
+                        <td>#${b.batch_id}</td>
+                        <td>${escapeHTML(b.tracking_code)}</td>
+                        <td>${b.batch_status === "In_Transit" ? "Đang vận chuyển" : "Đã về kho VN"}</td>
+                        <td>${b.associated_orders.map((o) => escapeHTML(o.customer_name) + " - " + escapeHTML(o.product_name)).join("<br>")}</td>
+                        <td>${b.batch_status === "In_Transit" ? '<button type="button" class="arrive">Đã về kho VN</button> <button type="button" class="btn-outline delete-batch">Xóa</button>' : ""}</td>
+                    </tr>`).join("") : '<tr><td colspan="5">Chưa có lô hàng nào.</td></tr>') + "</tbody>";
+            } catch (error) { showToast(error.message); }
+        }
+        $("#shipment-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const ids = [...document.querySelectorAll("#deposited-list input:checked")].map((c) => c.value);
+            if (!ids.length) return showToast("Hãy chọn ít nhất 1 đơn.");
+            try {
+                await send("/api/shipments", "POST", { tracking_code: $("#tracking-code").value.trim(), associated_orders: ids });
+                $("#tracking-code").value = "";
+                showToast("Đã tạo lô hàng.");
+                loadShipments();
+            } catch (error) { showToast(error.message); }
+        });
+        $("#shipments-table").addEventListener("click", async (event) => {
+            const row = event.target.closest("tr[data-id]");
+            if (!row) return;
+            try {
+                if (event.target.closest(".arrive")) {
+                    const result = await send(`/api/shipments/${row.dataset.id}/status`, "PATCH", { batch_status: "Arrived_VN_Warehouse" });
+                    showToast(`Lô đã về kho. ${result.orders_moved_to_waiting_for_address} đơn chuyển sang chờ địa chỉ / đợt 2.`);
+                } else if (event.target.closest(".delete-batch")) {
+                    if (!confirm("Xóa lô hàng này?")) return;
+                    await send(`/api/shipments/${row.dataset.id}`, "DELETE");
+                    showToast("Đã xóa lô hàng.");
+                } else return;
+                loadShipments();
+            } catch (error) { showToast(error.message); }
+        });
+
+        // ---------- Sản phẩm ----------
+        const vnDate = (iso) => new Date(new Date(iso).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+        async function loadProducts() {
+            try {
+                const items = await api("/api/products");
+                $("#products-table").innerHTML =
+                    "<thead><tr><th>ID</th><th>Tên</th><th>Trạng thái</th><th>Ép trạng thái</th><th>Slot còn / tổng</th><th>Hạn chót cọc</th><th></th></tr></thead><tbody>" +
+                    items.map((p) => `
+                    <tr data-id="${p.id}">
+                        <td>${p.id}</td>
+                        <td>${escapeHTML(p.name)}</td>
+                        <td>${poBadge(p.po_status)}</td>
+                        <td><select class="f-po"><option value="">(giữ nguyên)</option><option value="Open">Open (tự động)</option><option value="Closing Soon">Closing Soon</option><option value="Closed">Closed</option></select></td>
+                        <td><input type="number" class="f-slots" min="0" max="${p.total_slots}" value="${p.remaining_slots}" data-orig="${p.remaining_slots}"> / ${p.total_slots}</td>
+                        <td><input type="date" class="f-date" value="${vnDate(p.cut_off_date)}" data-orig="${vnDate(p.cut_off_date)}"></td>
+                        <td><button type="button" class="save-product">Lưu</button></td>
+                    </tr>`).join("") + "</tbody>";
+            } catch (error) { showToast(error.message); }
+        }
+        $("#products-table").addEventListener("click", async (event) => {
+            if (!event.target.closest(".save-product")) return;
+            const row = event.target.closest("tr");
+            const body = {};
+            const po = row.querySelector(".f-po").value;
+            const slots = row.querySelector(".f-slots");
+            const date = row.querySelector(".f-date");
+            if (po) body.po_status = po;
+            if (slots.value !== slots.dataset.orig) body.remaining_slots = Number(slots.value);
+            if (date.value && date.value !== date.dataset.orig) body.cut_off_date = date.value + "T23:59:59+07:00";
+            if (!Object.keys(body).length) return showToast("Chưa có thay đổi nào.");
+            try {
+                await send(`/api/products/${row.dataset.id}`, "PUT", body);
+                showToast("Đã cập nhật sản phẩm.");
+                loadProducts();
+            } catch (error) { showToast(error.message); }
+        });
+
+        // Tự đăng nhập lại nếu phiên này đã có khóa
+        if (adminKey) login(adminKey);
+    </script>
+</body>
+
+</html>

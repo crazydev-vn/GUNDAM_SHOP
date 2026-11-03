@@ -1,0 +1,105 @@
+[
+    {
+        "id": 1,
+        "name": "HG 1/144 RX-78-2 Gundam",
+        "category": "hg",
+        "deposit_price": 75000,
+        "total_price": 250000,
+        "total_slots": 100,
+        "remaining_slots": 62,
+        "cut_off_date": "2026-12-15T23:59:59+07:00",
+        "release_quarter_year": "Q2/2027",
+        "po_status": "Open",
+        "variants_bonus": [
+            "Kèm Action Base mini"
+        ],
+        "image": "images/gundam1.png",
+        "description": "Gundam huyền thoại, dễ lắp, không cần keo, lý tưởng cho người mới.",
+        "featured": true
+    },
+    {
+        "id": 2,
+        "name": "RG 1/144 Strike Freedom Gundam",
+        "category": "rg",
+        "deposit_price": 285000,
+        "total_price": 950000,
+        "total_slots": 60,
+        "remaining_slots": 18,
+        "cut_off_date": "2026-11-05T23:59:59+07:00",
+        "release_quarter_year": "Q1/2027",
+        "po_status": "Open",
+        "variants_bonus": [],
+        "image": "images/gundam2.png",
+        "description": "Khung xương Advanced MS Joint chi tiết, nhiều chi tiết lắp ráp tinh xảo.",
+        "featured": true
+    },
+    {
+        "id": 3,
+        "name": "MG 1/100 Freedom Gundam Ver.2.0",
+        "category": "mg",
+        "deposit_price": 375000,
+        "total_price": 1250000,
+        "total_slots": 40,
+        "remaining_slots": 25,
+        "cut_off_date": "2026-12-20T23:59:59+07:00",
+        "release_quarter_year": "Q3/2027",
+        "po_status": "Open",
+        "variants_bonus": [
+            "Decal nước phiên bản giới hạn",
+            "Standee acrylic"
+        ],
+        "image": "images/gundam3.png",
+        "description": "Khung trong đầy đủ, khớp linh hoạt, nhiều tư thế trình diễn.",
+        "featured": true
+    },
+    {
+        "id": 4,
+        "name": "PG 1/60 Unicorn Gundam",
+        "category": "pg",
+        "deposit_price": 1260000,
+        "total_price": 4200000,
+        "total_slots": 20,
+        "remaining_slots": 7,
+        "cut_off_date": "2026-11-30T23:59:59+07:00",
+        "release_quarter_year": "Q4/2027",
+        "po_status": "Open",
+        "variants_bonus": [
+            "Bộ LED phát sáng"
+        ],
+        "image": "images/gundam4.png",
+        "description": "Phân khúc cao cấp nhất, có hệ thống LED phát sáng và biến hình.",
+        "featured": true
+    },
+    {
+        "id": 5,
+        "name": "SD Gundam EX-Standard",
+        "category": "sd",
+        "deposit_price": 54000,
+        "total_price": 180000,
+        "total_slots": 120,
+        "remaining_slots": 0,
+        "cut_off_date": "2026-11-25T23:59:59+07:00",
+        "release_quarter_year": "Q1/2027",
+        "po_status": "Open",
+        "variants_bonus": [],
+        "image": "images/gundam5.png",
+        "description": "Dáng chibi đáng yêu, lắp nhanh, hợp làm quà tặng.",
+        "featured": true
+    },
+    {
+        "id": 6,
+        "name": "MGEX 1/100 Unicorn Gundam Ver.Ka",
+        "category": "mg",
+        "deposit_price": 1140000,
+        "total_price": 3800000,
+        "total_slots": 30,
+        "remaining_slots": 12,
+        "cut_off_date": "2027-01-10T23:59:59+07:00",
+        "release_quarter_year": "Q4/2027",
+        "po_status": "Open",
+        "variants_bonus": [],
+        "image": "images/gundam6.png",
+        "description": "Mô hình MG cao cấp với khung kim loại và chi tiết thiết kế lại.",
+        "featured": true
+    }
+]

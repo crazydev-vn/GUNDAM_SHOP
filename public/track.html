@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra Cứu Đơn Đặt Cọc | Gundam Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="brand">
+                <h1 class="brand-title">Gundam Store</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="contact.html">Liên hệ</a></li>
+                    <li><a href="track.html" class="active">Tra cứu đơn</a></li>
+                    <li><a href="#" id="cart-icon" style="color: var(--color-secondary); font-weight: bold;">Giỏ hàng
+                            (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section>
+            <h1>Tra Cứu Đơn Đặt Cọc</h1>
+            <p>Nhập số điện thoại và mã đơn (dạng #A1B2C3, hiện sau khi bạn đặt cọc) để xem tiến độ và bổ sung địa chỉ
+                nhận hàng.</p>
+        </section>
+
+        <div class="products-layout">
+            <form id="track-form" class="contact-form">
+                <div class="form-group">
+                    <label for="track-phone">Số điện thoại</label>
+                    <input type="tel" id="track-phone" placeholder="0900000000" inputmode="numeric" maxlength="10"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="track-code">Mã đơn</label>
+                    <input type="text" id="track-code" placeholder="A1B2C3" maxlength="7" required>
+                </div>
+                <button type="submit" class="btn">Tra cứu</button>
+            </form>
+            <div id="track-result"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 Gundam Store. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+
+    <!-- Popup Giỏ Hàng -->
+    <div id="cart-modal" class="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="cart-modal-header">
+                <h2>Giỏ Hàng Của Bạn</h2>
+                <button id="close-cart" class="btn btn-outline" style="padding: 4px 12px; font-size: 1.2rem;"
+                    aria-label="Đóng giỏ hàng">&times;</button>
+            </div>
+            <div class="cart-modal-body" id="cart-items"></div>
+            <div class="cart-modal-footer">
+                <p class="cart-total">Tổng giá trị: <span id="cart-total-price">0 đ</span></p>
+                <a href="contact.html" class="btn btn-secondary">Đến trang Đặt cọc</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        const STATUS_INFO = {
+            Pending_Deposit: ["Chờ chuyển khoản cọc", "Shop sẽ liên hệ hướng dẫn chuyển khoản cọc đợt 1."],
+            Deposited: ["Đã nhận cọc", "Mô hình đang được đặt hàng và vận chuyển về Việt Nam."],
+            Waiting_For_Address: ["Hàng đã về kho Việt Nam", "Vui lòng xác nhận địa chỉ nhận hàng và thanh toán đợt 2."],
+            Ready_To_Ship: ["Sẵn sàng giao", "Đơn đã đủ thanh toán, shop sắp gửi hàng."],
+            Completed: ["Đã hoàn tất", "Cảm ơn bạn đã đặt hàng!"],
+            Forfeited: ["Đã hủy / xả cọc", "Đơn không còn hiệu lực. Liên hệ shop nếu cần hỗ trợ."]
+        };
+        const trackForm = document.querySelector("#track-form");
+        const trackResult = document.querySelector("#track-result");
+        let currentLookup = null; // { phone, code } để gửi kèm khi cập nhật địa chỉ
+
+        function renderOrder(order) {
+            const info = STATUS_INFO[order.order_status] || [order.order_status, ""];
+            trackResult.innerHTML = `
+                <div class="filter-sidebar" style="height:auto;" role="status">
+                    <h2>Đơn #${escapeHTML(order.code)}</h2>
+                    <p><strong>${escapeHTML(order.product_name)}</strong> × ${order.quantity}</p>
+                    <p>Trạng thái: <strong>${escapeHTML(info[0])}</strong></p>
+                    <p style="color: var(--color-muted);">${escapeHTML(info[1])}</p>
+                    <p>Đã cọc đợt 1 (${order.deposit_tier}%): <strong>${formatVND(order.deposit_amount)}</strong></p>
+                    <p>Thanh toán đợt 2: <strong>${formatVND(order.second_payment_amount)}</strong></p>
+                    <p>Địa chỉ giao hàng: ${order.shipping_address ? escapeHTML(order.shipping_address) : "<em>chưa có</em>"}</p>
+                    ${order.can_edit_address ? `
+                    <form id="address-form" style="margin-top: 12px;">
+                        <div class="form-group">
+                            <label for="new-address">${order.shipping_address ? "Cập nhật địa chỉ" : "Bổ sung địa chỉ"}</label>
+                            <input type="text" id="new-address" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành" required>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Lưu địa chỉ</button>
+                    </form>` : ""}
+                </div>`;
+        }
+
+        trackForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const phone = document.querySelector("#track-phone").value.trim();
+            const code = document.querySelector("#track-code").value.trim();
+            if (!/^[0-9]{10}$/.test(phone)) return showToast("Số điện thoại phải gồm đúng 10 chữ số.");
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/lookup`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone, code })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    trackResult.innerHTML = "";
+                    return showToast(data.error || "Không tra cứu được đơn.");
+                }
+                currentLookup = { phone, code };
+                renderOrder(data);
+            } catch (error) {
+                showToast("Không thể kết nối tới server. Vui lòng thử lại sau.");
+            }
+        });
+
+        // Form địa chỉ được vẽ động -> bắt sự kiện ở khung cha
+        trackResult.addEventListener("submit", async (event) => {
+            if (event.target.id !== "address-form") return;
+            event.preventDefault();
+            const shipping_address = document.querySelector("#new-address").value.trim();
+            if (shipping_address.length < 10) return showToast("Địa chỉ phải có ít nhất 10 ký tự chi tiết.");
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/address`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...currentLookup, shipping_address })
+                });
+                const data = await response.json();
+                if (!response.ok) return showToast(data.error || "Không lưu được địa chỉ.");
+                renderOrder(data);
+                showToast("Đã lưu địa chỉ giao hàng!");
+            } catch (error) {
+                showToast("Không thể kết nối tới server. Vui lòng thử lại sau.");
+            }
+        });
+    </script>
+</body>
+
+</html>
