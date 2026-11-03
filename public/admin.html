@@ -217,7 +217,7 @@
                         <td>${escapeHTML(b.tracking_code)}</td>
                         <td>${b.batch_status === "In_Transit" ? "Đang vận chuyển" : "Đã về kho VN"}</td>
                         <td>${b.associated_orders.map((o) => escapeHTML(o.customer_name) + " - " + escapeHTML(o.product_name)).join("<br>")}</td>
-                        <td>${b.batch_status === "In_Transit" ? '<button type="button" class="arrive">Đã về kho VN</button> <button type="button" class="btn-outline delete-batch">Xóa</button>' : ""}</td>
+                        <td>${b.batch_status === "In_Transit" ? '<button type="button" class="arrive">Đã về kho VN</button> ' : ""}<button type="button" class="btn-outline delete-batch">Xóa</button></td>
                     </tr>`).join("") : '<tr><td colspan="5">Chưa có lô hàng nào.</td></tr>') + "</tbody>";
             } catch (error) { showToast(error.message); }
         }

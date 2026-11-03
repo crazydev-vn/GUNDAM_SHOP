@@ -4,7 +4,7 @@
 //   GET    /api/shipments              -> danh sách lô (kèm thông tin đơn trong lô)
 //   POST   /api/shipments              -> tạo lô: { tracking_code, associated_orders: [<order _id>] }
 //   PATCH  /api/shipments/:id/status   -> { batch_status: "Arrived_VN_Warehouse" }
-//   DELETE /api/shipments/:id          -> xóa lô (chỉ khi còn In_Transit)
+//   DELETE /api/shipments/:id          -> xóa lô (KHÔNG đổi lại trạng thái các đơn trong lô)
 // :id là batch_id (số).
 //
 // Khi lô chuyển sang Arrived_VN_Warehouse, mọi đơn trong lô đang "Deposited"
@@ -139,9 +139,6 @@ router.delete("/:id", async (req, res) => {
         const batch = await ShipmentBatch.findOne({ batch_id: batchId });
         if (!batch) {
             return res.status(404).json({ error: "Không tìm thấy lô hàng" });
-        }
-        if (batch.batch_status !== "In_Transit") {
-            return res.status(400).json({ error: "Lô đã về kho, không thể xóa." });
         }
         await batch.deleteOne();
         res.json({ message: "Đã xóa lô hàng" });
