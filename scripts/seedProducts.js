@@ -17,6 +17,7 @@ const connectDB = require("../config/db");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const ShipmentBatch = require("../models/ShipmentBatch");
+const User = require("../models/User");
 
 const args = process.argv.slice(2);
 const RESET = args.includes("--reset");   // xóa hết sản phẩm trước khi nạp
@@ -59,8 +60,22 @@ async function seed() {
         }
     }
 
+    // 5. Khởi tạo tài khoản Admin mặc định nếu chưa có
+    const adminExists = await User.findOne({ email: "admin@gundam.vn" });
+    if (!adminExists) {
+        await User.create({
+            name: "Quản trị viên Gundam",
+            email: "admin@gundam.vn",
+            password: "admin123456",
+            phone: "0900000000",
+            address: "Trụ sở Gundam Shop",
+            role: "admin",
+        });
+        console.log("👤 Đã tạo tài khoản Admin: admin@gundam.vn / admin123456");
+    }
+
     console.log(`✅ Seed hoàn tất: ${created} sản phẩm mới, ${updated} sản phẩm cập nhật.`);
-    await mongoose.disconnect(); // 5. đóng kết nối rồi thoát
+    await mongoose.disconnect(); // 6. đóng kết nối rồi thoát
     process.exit(0);
 }
 

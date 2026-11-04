@@ -14,6 +14,7 @@ const mongoose = require("mongoose"); // [MỚI] dùng để kiểm tra trạng 
 const connectDB = require("./config/db");
 
 // Mỗi file router xử lý 1 nhóm API giúp server.js gọn + dễ cập nhật
+const authRouter = require("./routes/auth.routes");
 const productsRouter = require("./routes/products.routes");
 const ordersRouter = require("./routes/orders.routes");
 const shipmentsRouter = require("./routes/shipments.routes");
@@ -40,7 +41,8 @@ app.get("/api/health", (req, res) => {
 });
 
 // Gắn router vào các API - bước "định tuyến": request tới đúng tiền tố
-// (/api/products hay /api/orders) sẽ được chuyển cho file router tương ứng.
+// (/api/auth; /api/products hay /api/orders) sẽ được chuyển cho file router tương ứng.
+app.use("/api/auth", authRouter);         // POST /register, /login; GET /me
 app.use("/api/products", productsRouter); // GET/POST/PUT/DELETE /api/products
 app.use("/api/orders", ordersRouter);     // POST/GET/PATCH/DELETE /api/orders
 app.use("/api/shipments", shipmentsRouter); // lô hàng nhập (chỉ admin)
