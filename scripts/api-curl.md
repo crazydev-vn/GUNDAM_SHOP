@@ -1,4 +1,3 @@
-
 # Lệnh curl thử API thủ công
 
 Server chạy bằng `npm run dev`. Trên **Windows PowerShell** hãy gõ `curl.exe` (không phải `curl`,

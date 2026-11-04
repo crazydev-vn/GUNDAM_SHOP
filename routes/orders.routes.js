@@ -4,6 +4,7 @@
 //   POST   /api/orders               -> khách đặt cọc (ai cũng dùng được)
 //   POST   /api/orders/lookup        -> khách tra cứu đơn bằng SĐT + mã đơn
 //   POST   /api/orders/address       -> khách bổ sung địa chỉ giao hàng
+
 //   GET    /api/orders               -> xem đơn (CHỈ admin), lọc ?order_status=&product_id=
 //   PATCH  /api/orders/:id/status    -> đổi trạng thái / bổ sung địa chỉ (CHỈ admin)
 //   DELETE /api/orders/:id           -> xóa 1 đơn (CHỈ admin)
