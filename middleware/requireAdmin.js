@@ -1,11 +1,8 @@
 // ============================================================
-// middleware/requireAdmin.js
-// VAI TRÒ: "người gác cổng" bảo vệ các API chỉ dành cho quản trị viên
-// (xem danh sách đơn hàng, xóa sản phẩm, xóa đơn hàng...).
-// Trước đây hàm này nằm trong orders.routes.js, giờ tách ra để
-// products.routes.js và orders.routes.js cùng dùng, khỏi viết lặp.
+// middleware/requireAdmin.js (wrapper chuyển tiếp sang middleware/auth.js)
 // ============================================================
 
+<<<<<<< HEAD
 // Middleware là hàm có 3 tham số (req, res, next):
 //   - req: request khách gửi lên (chứa headers, body, query...)
 //   - res: dùng để trả lời khách (res.json, res.status...)
@@ -28,3 +25,8 @@ module.exports = function requireAdmin(req, res, next) {
 
     next(); // hợp lệ -> đi tiếp vào route bên dưới (route thật sự xử lý)
 };
+=======
+const { requireAdmin } = require("./auth");
+
+module.exports = requireAdmin;
+>>>>>>> 6b3caaf20fb18e1fa36b22c31cec5ae052644462

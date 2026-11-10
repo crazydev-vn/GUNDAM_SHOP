@@ -104,4 +104,4 @@ async function seed() {
 seed().catch((error) => {
     console.error("❌ Lỗi khi seed dữ liệu:", error);
     process.exit(1);
-}); 
+});
